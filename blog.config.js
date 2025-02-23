@@ -64,7 +64,12 @@ GLOBAL_CSS: `
     font-size: 1.5rem; // 调整字体大小
   }
 `
-
+// 悬浮挂件
+  WIDGET_PET: process.env.NEXT_PUBLIC_WIDGET_PET || false, // 是否显示宠物挂件
+  WIDGET_PET_LINK:
+      process.env.NEXT_PUBLIC_WIDGET_PET_LINK ||
+      'https://cdn.jsdelivr.net/npm/live2d-widget-model-wanko@1.0.5/assets/wanko.model.json', // 挂件模型地址 @see https://github.com/xiazeyu/live2d-widget-models
+  WIDGET_PET_SWITCH_THEME: true, // 点击宠物挂件切换博客主题
   
    // 备案信息、Favicon 配置
   BEI_AN: process.env.NEXT_PUBLIC_BEI_AN || '',
