@@ -40,37 +40,14 @@ const BLOG = {
   ...require('./conf/ad.config'), // 广告营收插件
   ...require('./conf/plugin.config'), // 其他第三方插件 algolia全文索引
 
-// START ************网站字体*****************
-FONT_STYLE: process.env.NEXT_PUBLIC_FONT_STYLE || 'font-sans', // 设置字体风格
-FONT_URL: [
-  'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300&display=swap', // 你可以根据需求选择适当的字体文件
-  'https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300&display=swap' // 添加其他字体文件的 URL
-],
-FONT_SANS: [
-  '"PingFang SC"', '-apple-system', 'BlinkMacSystemFont', '"Hiragino Sans GB"', '"Microsoft YaHei"',
-  '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Segoe UI"', '"Noto Sans SC"', 'HarmonyOS_Regular',
-  '"Helvetica Neue"', 'Helvetica', '"Source Han Sans SC"', 'Arial', 'sans-serif', '"Apple Color Emoji"'
-], // 无衬线字体系列
-
-FONT_SERIF: [
-  'Bitter', '"Noto Serif SC"', 'SimSun', '"Times New Roman"', 'Times', 'serif', '"Segoe UI Emoji"',
-  '"Segoe UI Symbol"', '"Apple Color Emoji"'
-], // 衬线字体系列
-FONT_AWESOME: process.env.NEXT_PUBLIC_FONT_AWESOME_PATH || 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css', // 字体图标库
-// END ************网站字体*****************
-// 调整正文的字体大小
-GLOBAL_CSS: `
-  .notion {
-    font-size: 1.5rem; // 调整字体大小
-  }
-`
-// 悬浮挂件
-  WIDGET_PET: process.env.NEXT_PUBLIC_WIDGET_PET || false, // 是否显示宠物挂件
-  WIDGET_PET_LINK:
-      process.env.NEXT_PUBLIC_WIDGET_PET_LINK ||
-      'https://cdn.jsdelivr.net/npm/live2d-widget-model-wanko@1.0.5/assets/wanko.model.json', // 挂件模型地址 @see https://github.com/xiazeyu/live2d-widget-models
-  WIDGET_PET_SWITCH_THEME: true, // 点击宠物挂件切换博客主题
+module.exports = {
+  // 宠物挂件
+  WIDGET_PET: process.env.NEXT_PUBLIC_WIDGET_PET || false, // 改为 false
   
+  // 其他挂件配置保持默认...
+}
+
+
    // 备案信息、Favicon 配置
   BEI_AN: process.env.NEXT_PUBLIC_BEI_AN || '',
   BEI_AN_LINK: process.env.NEXT_PUBLIC_BEI_AN_LINK || 'https://beian.miit.gov.cn/',
