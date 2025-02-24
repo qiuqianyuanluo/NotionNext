@@ -40,15 +40,10 @@ const BLOG = {
   ...require('./conf/ad.config'), // 广告营收插件
   ...require('./conf/plugin.config'), // 其他第三方插件 algolia全文索引
 
-module.exports = {
-  // 宠物挂件
-  WIDGET_PET: process.env.NEXT_PUBLIC_WIDGET_PET || false, // 改为 false
-  
-  // 其他挂件配置保持默认...
-}
 
 
-   // 备案信息、Favicon 配置
+
+   // 保留正确的配置项
   BEI_AN: process.env.NEXT_PUBLIC_BEI_AN || '',
   BEI_AN_LINK: process.env.NEXT_PUBLIC_BEI_AN_LINK || 'https://beian.miit.gov.cn/',
   BLOG_FAVICON: process.env.NEXT_PUBLIC_FAVICON || '/favicon.ico',
