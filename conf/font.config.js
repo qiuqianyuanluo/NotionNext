@@ -9,7 +9,7 @@ module.exports = {
 
   // 加载 Noto Serif SC 400/700 字重
   FONT_URL: [
-    'https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@150;350&display=swap'
+    'https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@150;450&display=swap'
   ],
 
   // 无衬线字体列表（强制使用 Noto Serif SC）
