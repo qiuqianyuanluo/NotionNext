@@ -53,6 +53,13 @@ const preBuild = (function () {
     fs.unlinkSync(sitemap2Path)
     console.log('Deleted existing sitemap.xml from root directory')
   }
+
+  // 删除 public/rss 目录中的静态 feed，避免覆盖动态 RSS 路由。
+  const rssPath = path.resolve(__dirname, 'public', 'rss')
+  if (fs.existsSync(rssPath)) {
+    fs.rmSync(rssPath, { recursive: true, force: true })
+    console.log('Deleted existing rss directory from public directory')
+  }
 })()
 
 /**
@@ -332,9 +339,10 @@ const nextConfig = {
     defaultPathMap,
     { dev, dir, outDir, distDir, buildId }
   ) {
-    // export 静态导出时 忽略/pages/sitemap.xml.js ， 否则和getServerSideProps这个动态文件冲突
+    // export 静态导出时忽略动态 XML 路由，否则会和 getServerSideProps 冲突
     const pages = { ...defaultPathMap }
     delete pages['/sitemap.xml']
+    delete pages['/rss/feed.xml']
     delete pages['/auth']
     return pages
   },
