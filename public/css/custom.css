@@ -6,3 +6,14 @@
 .fa-info:before {
     content: "\f05a";
 }
+
+#cusdis_thread iframe {
+    display: block;
+    min-height: 32rem;
+}
+
+@media (max-width: 768px) {
+    #cusdis_thread iframe {
+        min-height: 36rem;
+    }
+}
