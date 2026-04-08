@@ -24,3 +24,7 @@
         min-height: 36rem;
     }
 }
+
+.article-heart-button {
+    -webkit-tap-highlight-color: transparent;
+}
