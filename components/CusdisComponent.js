@@ -11,17 +11,26 @@ const CusdisComponent = ({ frontMatter }) => {
   const i18nForCusdis = siteConfig('LANG').toLowerCase().indexOf('zh') === 0 ? siteConfig('LANG').toLowerCase() : siteConfig('LANG').toLowerCase().substring(0, 2)
   const langCDN = siteConfig('COMMENT_CUSDIS_LANG_SRC', `https://cusdis.com/js/widget/lang/${i18nForCusdis}.js`)
 
-  //   处理cusdis主题
   useEffect(() => {
-    loadCusdis()
-  }, [isDarkMode, lang])
+    let timer = null
 
-  const loadCusdis = async () => {
-    await loadExternalResource(langCDN, 'js')
-    await loadExternalResource(src, 'js')
+    const initCusdis = async () => {
+      await loadExternalResource(langCDN, 'js')
+      await loadExternalResource(src, 'js')
 
-    window?.CUSDIS?.initial()
-  }
+      timer = window.setTimeout(() => {
+        window?.CUSDIS?.initial?.()
+      }, 60)
+    }
+
+    initCusdis()
+
+    return () => {
+      if (timer) {
+        window.clearTimeout(timer)
+      }
+    }
+  }, [frontMatter?.id, frontMatter?.title, isDarkMode, lang, router.asPath, langCDN, src])
 
   return <div id="cusdis_thread"
         lang={lang.toLowerCase()}
