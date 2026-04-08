@@ -15,6 +15,7 @@ import { createContext, useContext, useEffect, useRef } from 'react'
 import ArticleDetail from './components/ArticleDetail'
 import ArticleLock from './components/ArticleLock'
 import AsideLeft from './components/AsideLeft'
+import BackToTopButton from './components/BackToTopButton'
 import BlogListPage from './components/BlogListPage'
 import BlogListScroll from './components/BlogListScroll'
 import BlogArchiveItem from './components/BlogPostArchive'
@@ -95,6 +96,7 @@ const LayoutBase = props => {
         </div>
 
         <AlgoliaSearchModal cRef={searchModal} {...props} />
+        <BackToTopButton />
       </div>
     </ThemeGlobalFukasawa.Provider>
   )
