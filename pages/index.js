@@ -2,11 +2,11 @@ import BLOG from '@/blog.config'
 import { siteConfig } from '@/lib/config'
 import { fetchGlobalAllData, getPostBlocks } from '@/lib/db/SiteDataApi'
 import { generateRobotsTxt } from '@/lib/utils/robots.txt'
-import { generateRss } from '@/lib/utils/rss'
 import { generateSitemapXml } from '@/lib/utils/sitemap.xml'
 import { DynamicLayout } from '@/themes/theme'
 import { generateRedirectJson } from '@/lib/utils/redirect'
 import { checkDataFromAlgolia } from '@/lib/plugins/algolia'
+import { generateRss } from '@/lib/utils/rss'
 
 /**
  * 首页布局
@@ -58,8 +58,10 @@ export async function getStaticProps(req) {
 
   // 生成robotTxt
   generateRobotsTxt(props)
-  // 生成Feed订阅
-  generateRss(props)
+  // 静态导出时才写入 feed 文件；Vercel 运行环境使用动态 XML 路由
+  if (process.env.EXPORT) {
+    generateRss(props)
+  }
   // 生成
   generateSitemapXml(props)
   // 检查数据是否需要从algolia删除
