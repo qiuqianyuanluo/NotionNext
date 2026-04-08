@@ -7,9 +7,16 @@
     content: "\f05a";
 }
 
+#cusdis_thread {
+    overflow: hidden;
+}
+
 #cusdis_thread iframe {
     display: block;
-    min-height: 32rem;
+    width: 100%;
+    border: 0;
+    overflow: hidden;
+    min-height: 45rem;
 }
 
 @media (max-width: 768px) {
