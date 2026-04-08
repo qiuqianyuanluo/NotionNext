@@ -28,7 +28,16 @@ const Comment = ({ frontMatter, className }) => {
   const COMMENT_WEBMENTION_ENABLE = siteConfig('COMMENT_WEBMENTION_ENABLE')
 
   useEffect(() => {
-    // Check if the component is visible in the viewport
+    if (shouldLoad || !commentRef.current) {
+      return
+    }
+
+    if (!window.IntersectionObserver) {
+      setShouldLoad(true)
+      return
+    }
+
+    // 提前一点开始加载评论，避免移动端滚动到评论区后还要再点一次才触发脚本。
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -36,32 +45,37 @@ const Comment = ({ frontMatter, className }) => {
           observer.unobserve(entry.target)
         }
       })
-    })
+    }, { rootMargin: '320px 0px' })
 
-    if (commentRef.current) {
-      observer.observe(commentRef.current)
-    }
+    observer.observe(commentRef.current)
 
     return () => {
       if (commentRef.current) {
         observer.unobserve(commentRef.current)
       }
     }
-  }, [frontMatter])
+  }, [frontMatter, shouldLoad])
 
   // 当连接中有特殊参数时跳转到评论区
-  if (
-    isBrowser &&
-    ('giscus' in router.query || router.query.target === 'comment')
-  ) {
-    setTimeout(() => {
+  useEffect(() => {
+    if (
+      !isBrowser ||
+      !('giscus' in router.query || router.query.target === 'comment')
+    ) {
+      return
+    }
+
+    setShouldLoad(true)
+    const timer = setTimeout(() => {
       const url = router.asPath.replace('?target=comment', '')
       history.replaceState({}, '', url)
       document
         ?.getElementById('comment')
         ?.scrollIntoView({ block: 'start', behavior: 'smooth' })
     }, 1000)
-  }
+
+    return () => clearTimeout(timer)
+  }, [router.asPath, router.query])
 
   if (!frontMatter) {
     return null
@@ -73,6 +87,63 @@ const Comment = ({ frontMatter, className }) => {
 
   // 特定文章关闭评论区
   if (frontMatter?.comment === 'Hide') {
+    return null
+  }
+
+  // 当前站点优先只保留 Cusdis；如果未配置 Cusdis，再回退到其它评论系统。
+  const commentItems = COMMENT_CUSDIS_APP_ID
+    ? [
+        <div key='Cusdis'>
+          <CusdisComponent frontMatter={frontMatter} />
+        </div>
+      ]
+    : [
+        COMMENT_ARTALK_SERVER && (
+          <div key='Artalk'>
+            <Artalk />
+          </div>
+        ),
+        COMMENT_TWIKOO_ENV_ID && (
+          <div key='Twikoo'>
+            <TwikooCompenent />
+          </div>
+        ),
+        COMMENT_WALINE_SERVER_URL && (
+          <div key='Waline'>
+            <WalineComponent />
+          </div>
+        ),
+        COMMENT_VALINE_APP_ID && (
+          <div key='Valine' name='reply'>
+            <ValineComponent path={frontMatter.id} />
+          </div>
+        ),
+        COMMENT_GISCUS_REPO && (
+          <div key='Giscus'>
+            <GiscusComponent className='px-2' />
+          </div>
+        ),
+        COMMENT_UTTERRANCES_REPO && (
+          <div key='Utterance'>
+            <UtterancesComponent
+              issueTerm={frontMatter.id}
+              className='px-2'
+            />
+          </div>
+        ),
+        COMMENT_GITALK_CLIENT_ID && (
+          <div key='GitTalk'>
+            <GitalkComponent frontMatter={frontMatter} />
+          </div>
+        ),
+        COMMENT_WEBMENTION_ENABLE && (
+          <div key='WebMention'>
+            <WebMentionComponent frontMatter={frontMatter} className='px-2' />
+          </div>
+        )
+      ].filter(Boolean)
+
+  if (commentItems.length === 0) {
     return null
   }
 
@@ -91,64 +162,9 @@ const Comment = ({ frontMatter, className }) => {
       )}
 
       {shouldLoad && (
-        <Tabs>
-          {COMMENT_ARTALK_SERVER && (
-            <div key='Artalk'>
-              <Artalk />
-            </div>
-          )}
-
-          {COMMENT_TWIKOO_ENV_ID && (
-            <div key='Twikoo'>
-              <TwikooCompenent />
-            </div>
-          )}
-
-          {COMMENT_WALINE_SERVER_URL && (
-            <div key='Waline'>
-              <WalineComponent />
-            </div>
-          )}
-
-          {COMMENT_VALINE_APP_ID && (
-            <div key='Valine' name='reply'>
-              <ValineComponent path={frontMatter.id} />
-            </div>
-          )}
-
-          {COMMENT_GISCUS_REPO && (
-            <div key='Giscus'>
-              <GiscusComponent className='px-2' />
-            </div>
-          )}
-
-          {COMMENT_CUSDIS_APP_ID && (
-            <div key='Cusdis'>
-              <CusdisComponent frontMatter={frontMatter} />
-            </div>
-          )}
-
-          {COMMENT_UTTERRANCES_REPO && (
-            <div key='Utterance'>
-              <UtterancesComponent
-                issueTerm={frontMatter.id}
-                className='px-2'
-              />
-            </div>
-          )}
-
-          {COMMENT_GITALK_CLIENT_ID && (
-            <div key='GitTalk'>
-              <GitalkComponent frontMatter={frontMatter} />
-            </div>
-          )}
-
-          {COMMENT_WEBMENTION_ENABLE && (
-            <div key='WebMention'>
-              <WebMentionComponent frontMatter={frontMatter} className='px-2' />
-            </div>
-          )}
-        </Tabs>
+        commentItems.length === 1
+          ? commentItems[0]
+          : <Tabs>{commentItems}</Tabs>
       )}
     </div>
   )
