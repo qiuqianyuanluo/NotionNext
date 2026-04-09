@@ -4,6 +4,7 @@ const crypto = require('crypto')
 const https = require('https')
 const http = require('http')
 const { URL } = require('url')
+const { spawnSync } = require('child_process')
 
 function md5(value) {
   return crypto.createHash('md5').update(value).digest('hex')
@@ -57,6 +58,11 @@ Notes:
 }
 
 async function callTwikoo(url, payload) {
+  const curlResult = tryCallTwikooWithCurl(url, payload)
+  if (curlResult) {
+    return curlResult
+  }
+
   const endpoint = new URL(url)
   const body = JSON.stringify(payload)
   const transport = endpoint.protocol === 'http:' ? http : https
@@ -96,6 +102,50 @@ async function callTwikoo(url, payload) {
     request.write(body)
     request.end()
   })
+}
+
+function tryCallTwikooWithCurl(url, payload) {
+  const result = spawnSync(
+    'curl',
+    [
+      '--silent',
+      '--show-error',
+      '--location',
+      '--max-time',
+      '20',
+      '--header',
+      'Content-Type: application/json',
+      '--data',
+      JSON.stringify(payload),
+      url
+    ],
+    {
+      encoding: 'utf8'
+    }
+  )
+
+  if (result.error) {
+    return null
+  }
+
+  if (result.status !== 0) {
+    const stderr = (result.stderr || '').trim()
+    if (stderr) {
+      throw new Error(`curl failed: ${stderr}`)
+    }
+    return null
+  }
+
+  const raw = (result.stdout || '').trim()
+  if (!raw) {
+    throw new Error('curl returned an empty response')
+  }
+
+  try {
+    return JSON.parse(raw)
+  } catch (error) {
+    throw new Error(`Twikoo returned a non-JSON response: ${raw}`)
+  }
 }
 
 async function ensurePassword(url, passwordHash) {
