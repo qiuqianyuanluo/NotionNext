@@ -24,6 +24,9 @@ module.exports = {
   COMMENT_TWIKOO_CDN_URL:
     process.env.NEXT_PUBLIC_COMMENT_TWIKOO_CDN_URL ||
     'https://s4.zstatic.net/npm/twikoo@1.6.44/dist/twikoo.min.js', // twikoo客户端cdn
+  COMMENT_TWIKOO_PLACEHOLDER:
+    process.env.NEXT_PUBLIC_COMMENT_TWIKOO_PLACEHOLDER ||
+    '邮箱用于接收回复的邮件提醒XD，邮箱地址不公开', // Twikoo 留言框提示文案，会优先覆盖后端 COMMENT_PLACEHOLDER
 
   // utterance
   COMMENT_UTTERRANCES_REPO:

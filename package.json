@@ -46,7 +46,8 @@
     "health-check": "node scripts/health-check.js",
     "validate": "npm run health-check",
     "final-validation": "node scripts/final-validation.js",
-    "migrate:cusdis-to-twikoo": "node scripts/cusdis-to-twikoo.js"
+    "migrate:cusdis-to-twikoo": "node scripts/cusdis-to-twikoo.js",
+    "config:twikoo": "node scripts/twikoo-config.js"
   },
   "dependencies": {
     "@clerk/localizations": "^3.17.1",
