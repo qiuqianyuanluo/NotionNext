@@ -23,7 +23,7 @@ module.exports = {
     process.env.NEXT_PUBLIC_COMMENT_TWIKOO_COUNT_ENABLE || false, // 博客列表是否显示评论数
   COMMENT_TWIKOO_CDN_URL:
     process.env.NEXT_PUBLIC_COMMENT_TWIKOO_CDN_URL ||
-    'https://s4.zstatic.net/npm/twikoo@1.6.44/dist/twikoo.min.js', // twikoo客户端cdn
+    'https://s4.zstatic.net/npm/twikoo@1.7.7/dist/twikoo.min.js', // twikoo客户端cdn，尽量与后端版本保持一致
   COMMENT_TWIKOO_PLACEHOLDER:
     process.env.NEXT_PUBLIC_COMMENT_TWIKOO_PLACEHOLDER ||
     '如填写邮箱会收到回复的邮件提醒 :) 填写后不会公开', // Twikoo 留言框提示文案，会优先覆盖后端 COMMENT_PLACEHOLDER
