@@ -50,7 +50,7 @@ const Comment = ({ frontMatter, className }) => {
           observer.unobserve(entry.target)
         }
       })
-    }, { rootMargin: '320px 0px' })
+    }, { rootMargin: '960px 0px' })
 
     observer.observe(commentRef.current)
 
