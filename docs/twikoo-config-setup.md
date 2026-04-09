@@ -7,7 +7,7 @@
 - 只显示 `昵称` 和 `邮箱`
 - `昵称` 必填，`邮箱` 选填
 - 留言框提示文案：
-  - `邮箱用于接收回复的邮件提醒：），邮箱地址不公开`
+  - `如填写邮箱会收到回复的邮件提醒 :) 填写后不会公开`
 
 ## 使用方法
 
@@ -18,7 +18,7 @@ npm run config:twikoo -- \
   --password '你的管理员密码' \
   --set DISPLAYED_FIELDS=nick,mail \
   --set REQUIRED_FIELDS=nick \
-  --set COMMENT_PLACEHOLDER='邮箱用于接收回复的邮件提醒：），邮箱地址不公开'
+  --set COMMENT_PLACEHOLDER='如填写邮箱会收到回复的邮件提醒 :) 填写后不会公开'
 ```
 
 ### 说明
@@ -41,7 +41,7 @@ npm run config:twikoo -- \
 当前博客前端也支持通过环境变量覆盖留言框提示文案：
 
 ```text
-NEXT_PUBLIC_COMMENT_TWIKOO_PLACEHOLDER=邮箱用于接收回复的邮件提醒：），邮箱地址不公开
+NEXT_PUBLIC_COMMENT_TWIKOO_PLACEHOLDER=如填写邮箱会收到回复的邮件提醒 :) 填写后不会公开
 ```
 
 这个前端占位文案会优先于后端 `COMMENT_PLACEHOLDER`。
