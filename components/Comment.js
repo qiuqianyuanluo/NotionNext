@@ -26,6 +26,11 @@ const Comment = ({ frontMatter, className }) => {
   const COMMENT_UTTERRANCES_REPO = siteConfig('COMMENT_UTTERRANCES_REPO')
   const COMMENT_GITALK_CLIENT_ID = siteConfig('COMMENT_GITALK_CLIENT_ID')
   const COMMENT_WEBMENTION_ENABLE = siteConfig('COMMENT_WEBMENTION_ENABLE')
+  const COMMENT_ACTIVE_SERVICE = String(
+    siteConfig('COMMENT_ACTIVE_SERVICE') || ''
+  )
+    .trim()
+    .toLowerCase()
 
   useEffect(() => {
     if (shouldLoad || !commentRef.current) {
@@ -90,57 +95,78 @@ const Comment = ({ frontMatter, className }) => {
     return null
   }
 
+  const singleServiceItems = {
+    artalk: COMMENT_ARTALK_SERVER && (
+      <div key='Artalk'>
+        <Artalk />
+      </div>
+    ),
+    twikoo: COMMENT_TWIKOO_ENV_ID && (
+      <div key='Twikoo'>
+        <TwikooCompenent />
+      </div>
+    ),
+    waline: COMMENT_WALINE_SERVER_URL && (
+      <div key='Waline'>
+        <WalineComponent />
+      </div>
+    ),
+    valine: COMMENT_VALINE_APP_ID && (
+      <div key='Valine' name='reply'>
+        <ValineComponent path={frontMatter.id} />
+      </div>
+    ),
+    giscus: COMMENT_GISCUS_REPO && (
+      <div key='Giscus'>
+        <GiscusComponent className='px-2' />
+      </div>
+    ),
+    cusdis: COMMENT_CUSDIS_APP_ID && (
+      <div key='Cusdis'>
+        <CusdisComponent frontMatter={frontMatter} />
+      </div>
+    ),
+    utterances: COMMENT_UTTERRANCES_REPO && (
+      <div key='Utterance'>
+        <UtterancesComponent
+          issueTerm={frontMatter.id}
+          className='px-2'
+        />
+      </div>
+    ),
+    gitalk: COMMENT_GITALK_CLIENT_ID && (
+      <div key='GitTalk'>
+        <GitalkComponent frontMatter={frontMatter} />
+      </div>
+    ),
+    webmention: COMMENT_WEBMENTION_ENABLE && (
+      <div key='WebMention'>
+        <WebMentionComponent frontMatter={frontMatter} className='px-2' />
+      </div>
+    )
+  }
+
+  const forcedCommentItem =
+    COMMENT_ACTIVE_SERVICE && singleServiceItems[COMMENT_ACTIVE_SERVICE]
+
   // 当前站点优先只保留 Cusdis；如果未配置 Cusdis，再回退到其它评论系统。
-  const commentItems = COMMENT_CUSDIS_APP_ID
+  const commentItems = forcedCommentItem
+    ? [forcedCommentItem]
+    : COMMENT_CUSDIS_APP_ID
     ? [
         <div key='Cusdis'>
           <CusdisComponent frontMatter={frontMatter} />
         </div>
       ]
     : [
-        COMMENT_ARTALK_SERVER && (
-          <div key='Artalk'>
-            <Artalk />
-          </div>
-        ),
-        COMMENT_TWIKOO_ENV_ID && (
-          <div key='Twikoo'>
-            <TwikooCompenent />
-          </div>
-        ),
-        COMMENT_WALINE_SERVER_URL && (
-          <div key='Waline'>
-            <WalineComponent />
-          </div>
-        ),
-        COMMENT_VALINE_APP_ID && (
-          <div key='Valine' name='reply'>
-            <ValineComponent path={frontMatter.id} />
-          </div>
-        ),
-        COMMENT_GISCUS_REPO && (
-          <div key='Giscus'>
-            <GiscusComponent className='px-2' />
-          </div>
-        ),
-        COMMENT_UTTERRANCES_REPO && (
-          <div key='Utterance'>
-            <UtterancesComponent
-              issueTerm={frontMatter.id}
-              className='px-2'
-            />
-          </div>
-        ),
-        COMMENT_GITALK_CLIENT_ID && (
-          <div key='GitTalk'>
-            <GitalkComponent frontMatter={frontMatter} />
-          </div>
-        ),
-        COMMENT_WEBMENTION_ENABLE && (
-          <div key='WebMention'>
-            <WebMentionComponent frontMatter={frontMatter} className='px-2' />
-          </div>
-        )
+        singleServiceItems.artalk,
+        singleServiceItems.twikoo,
+        singleServiceItems.waline,
+        singleServiceItems.valine,
+        singleServiceItems.giscus,
+        singleServiceItems.utterances,
+        singleServiceItems.gitalk,
+        singleServiceItems.webmention
       ].filter(Boolean)
 
   if (commentItems.length === 0) {

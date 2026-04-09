@@ -45,7 +45,8 @@
     "test:ci": "jest --ci --coverage --watchAll=false",
     "health-check": "node scripts/health-check.js",
     "validate": "npm run health-check",
-    "final-validation": "node scripts/final-validation.js"
+    "final-validation": "node scripts/final-validation.js",
+    "migrate:cusdis-to-twikoo": "node scripts/cusdis-to-twikoo.js"
   },
   "dependencies": {
     "@clerk/localizations": "^3.17.1",
