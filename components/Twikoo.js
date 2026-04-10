@@ -2,25 +2,26 @@ import { siteConfig } from '@/lib/config'
 import { loadExternalResource } from '@/lib/utils'
 import { useEffect, useRef, useState } from 'react'
 
-/**
- * Giscus评论 @see https://giscus.app/zh-CN
- * Contribute by @txs https://github.com/txs/NotionNext/commit/1bf7179d0af21fb433e4c7773504f244998678cb
- * @returns {JSX.Element}
- * @constructor
- */
-
-const Twikoo = ({ isDarkMode }) => {
+const Twikoo = () => {
   const envId = siteConfig('COMMENT_TWIKOO_ENV_ID')
   const el = siteConfig('COMMENT_TWIKOO_ELEMENT_ID', '#twikoo')
   const twikooCDNURL = siteConfig('COMMENT_TWIKOO_CDN_URL')
   const placeholder = siteConfig('COMMENT_TWIKOO_PLACEHOLDER')
   const lang = siteConfig('LANG')
-  const [isInit] = useState(useRef(false))
+  const [isReady, setIsReady] = useState(false)
+  const initializedRef = useRef(false)
+  const readyTimerRef = useRef(null)
+  const observerRef = useRef(null)
+
+  const clearReadyTimer = () => {
+    if (readyTimerRef.current) {
+      clearTimeout(readyTimerRef.current)
+      readyTimerRef.current = null
+    }
+  }
 
   const preconnect = urlLike => {
-    if (typeof document === 'undefined' || !urlLike) {
-      return
-    }
+    if (typeof document === 'undefined' || !urlLike) return
 
     try {
       const origin = new URL(urlLike).origin
@@ -28,15 +29,11 @@ const Twikoo = ({ isDarkMode }) => {
 
       rels.forEach(rel => {
         const selector = `link[rel="${rel}"][href="${origin}"]`
-        if (document.head.querySelector(selector)) {
-          return
-        }
+        if (document.head.querySelector(selector)) return
         const link = document.createElement('link')
         link.rel = rel
         link.href = origin
-        if (rel === 'preconnect') {
-          link.crossOrigin = 'anonymous'
-        }
+        if (rel === 'preconnect') link.crossOrigin = 'anonymous'
         document.head.appendChild(link)
       })
     } catch (error) {
@@ -44,47 +41,118 @@ const Twikoo = ({ isDarkMode }) => {
     }
   }
 
-  const loadTwikoo = async () => {
-    try {
-      preconnect(envId)
-      preconnect(twikooCDNURL)
-      await loadExternalResource(twikooCDNURL, 'js')
-      const twikoo = window?.twikoo
-      if (
-        typeof twikoo !== 'undefined' &&
-        twikoo &&
-        typeof twikoo.init === 'function'
-      ) {
-        twikoo.init({
-          envId: envId, // 腾讯云环境填 envId；Vercel 环境填地址（https://xxx.vercel.app）
-          el: el, // 容器元素
-          lang: lang, // 用于手动设定评论区语言，支持的语言列表 https://github.com/imaegoo/twikoo/blob/main/src/client/utils/i18n/index.js
-          placeholder: placeholder || undefined,
-          path: location.pathname
-          // region: 'ap-guangzhou', // 环境地域，默认为 ap-shanghai，腾讯云环境填 ap-shanghai 或 ap-guangzhou；Vercel 环境不填
-          // path: location.pathname, // 用于区分不同文章的自定义 js 路径，如果您的文章路径不是 location.pathname，需传此参数
-        })
-        console.log('twikoo init', twikoo)
-        isInit.current = true
+  const markReadySoon = () => {
+    clearReadyTimer()
+    readyTimerRef.current = setTimeout(() => {
+      setIsReady(true)
+    }, 180)
+  }
+
+  const watchRender = () => {
+    if (typeof document === 'undefined') return () => {}
+
+    const host = document.querySelector(el)
+    if (!host) return () => {}
+
+    const hasRenderableContent = () => {
+      return Boolean(
+        host.querySelector('textarea') ||
+          host.querySelector('.tk-meta-input') ||
+          host.querySelector('.tk-submit') ||
+          host.querySelector('.tk-comments') ||
+          host.textContent?.trim()
+      )
+    }
+
+    if (hasRenderableContent()) {
+      markReadySoon()
+    }
+
+    observerRef.current?.disconnect()
+    observerRef.current = new MutationObserver(() => {
+      if (hasRenderableContent()) {
+        markReadySoon()
       }
-    } catch (error) {
-      console.error('twikoo 加载失败', error)
+    })
+
+    observerRef.current.observe(host, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      characterData: true
+    })
+
+    const fallback = setTimeout(() => {
+      if (hasRenderableContent()) {
+        setIsReady(true)
+      }
+    }, 2500)
+
+    return () => {
+      clearTimeout(fallback)
+      observerRef.current?.disconnect()
+      observerRef.current = null
+      clearReadyTimer()
     }
   }
 
   useEffect(() => {
-    loadTwikoo()
-    const interval = setInterval(() => {
-      if (isInit.current) {
-        console.log('twioo init! clear interval')
-        clearInterval(interval)
-      } else {
-        loadTwikoo()
+    let disposed = false
+    let cleanupObserver = () => {}
+
+    const initTwikoo = async () => {
+      if (!envId || !twikooCDNURL || initializedRef.current) return
+
+      try {
+        preconnect(envId)
+        preconnect(twikooCDNURL)
+        cleanupObserver = watchRender()
+        await loadExternalResource(twikooCDNURL, 'js')
+        if (disposed || initializedRef.current) return
+
+        const twikoo = window?.twikoo
+        if (typeof twikoo?.init !== 'function') {
+          throw new Error('twikoo.init is not available')
+        }
+
+        initializedRef.current = true
+        twikoo.init({
+          envId,
+          el,
+          lang,
+          placeholder: placeholder || undefined,
+          path: location.pathname
+        })
+      } catch (error) {
+        console.error('twikoo 加载失败', error)
       }
-    }, 400)
-    return () => clearInterval(interval)
-  }, [isDarkMode])
-  return <div id="twikoo"></div>
+    }
+
+    setIsReady(false)
+    initializedRef.current = false
+    initTwikoo()
+
+    return () => {
+      disposed = true
+      cleanupObserver()
+      initializedRef.current = false
+    }
+  }, [el, envId, lang, placeholder, twikooCDNURL])
+
+  return (
+    <div className='relative min-h-[12rem]'>
+      {!isReady && (
+        <div className='rounded-md border border-gray-200 bg-white/70 p-4 text-sm text-gray-400 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-500'>
+          评论加载中...
+        </div>
+      )}
+      <div
+        id='twikoo'
+        style={{ visibility: isReady ? 'visible' : 'hidden' }}
+        className={isReady ? '' : 'absolute inset-0'}
+      />
+    </div>
+  )
 }
 
 export default Twikoo
