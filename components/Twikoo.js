@@ -12,11 +12,19 @@ const Twikoo = () => {
   const initializedRef = useRef(false)
   const readyTimerRef = useRef(null)
   const observerRef = useRef(null)
+  const forceReadyTimerRef = useRef(null)
 
   const clearReadyTimer = () => {
     if (readyTimerRef.current) {
       clearTimeout(readyTimerRef.current)
       readyTimerRef.current = null
+    }
+  }
+
+  const clearForceReadyTimer = () => {
+    if (forceReadyTimerRef.current) {
+      clearTimeout(forceReadyTimerRef.current)
+      forceReadyTimerRef.current = null
     }
   }
 
@@ -93,6 +101,7 @@ const Twikoo = () => {
       observerRef.current?.disconnect()
       observerRef.current = null
       clearReadyTimer()
+      clearForceReadyTimer()
     }
   }
 
@@ -123,6 +132,10 @@ const Twikoo = () => {
           placeholder: placeholder || undefined,
           path: location.pathname
         })
+        clearForceReadyTimer()
+        forceReadyTimerRef.current = setTimeout(() => {
+          setIsReady(true)
+        }, 900)
       } catch (error) {
         console.error('twikoo 加载失败', error)
       }
@@ -136,20 +149,18 @@ const Twikoo = () => {
       disposed = true
       cleanupObserver()
       initializedRef.current = false
+      clearForceReadyTimer()
     }
   }, [el, envId, lang, placeholder, twikooCDNURL])
 
   return (
     <div className='relative min-h-[12rem]'>
-      {!isReady && (
-        <div className='rounded-md border border-gray-200 bg-white/70 p-4 text-sm text-gray-400 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-500'>
-          评论加载中...
-        </div>
-      )}
       <div
         id='twikoo'
-        style={{ visibility: isReady ? 'visible' : 'hidden' }}
-        className={isReady ? '' : 'absolute inset-0'}
+        style={{ opacity: isReady ? 1 : 0 }}
+        className={`transition-opacity duration-300 ${
+          isReady ? '' : 'pointer-events-none'
+        }`}
       />
     </div>
   )
