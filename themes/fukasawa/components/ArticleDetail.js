@@ -1,5 +1,8 @@
 import Comment from '@/components/Comment'
-import { ArticleHeartButton, ArticleHeartProvider } from '@/components/ArticleHeart'
+import {
+  ArticleHeartButton,
+  ArticleHeartProvider
+} from '@/components/ArticleHeart'
 import { AdSlot } from '@/components/GoogleAdsense'
 import LazyImage from '@/components/LazyImage'
 import NotionIcon from '@/components/NotionIcon'
@@ -71,7 +74,10 @@ export default function ArticleDetail(props) {
                 {post?.type !== 'Page' && (
                   <>
                     <SmartLink
-                      href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
+                      href={`/archive#${formatDateFmt(
+                        post?.publishDate,
+                        'yyyy-MM'
+                      )}`}
                       passHref
                       className='pl-1 mr-2 cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 border-b dark:border-gray-500 border-dashed'>
                       {post?.publishDay}
@@ -115,7 +121,11 @@ export default function ArticleDetail(props) {
             {/* 分享 */}
             <ShareBar
               post={post}
-              leftContent={post?.type === 'Post' ? <ArticleHeartButton variant='bottom' /> : null}
+              leftContent={
+                post?.type === 'Post' ? (
+                  <ArticleHeartButton variant='bottom' />
+                ) : null
+              }
               stackOnMobile
             />
           </section>

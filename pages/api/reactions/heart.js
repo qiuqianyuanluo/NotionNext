@@ -17,7 +17,9 @@ async function getReactionState(postId, visitorId) {
   const [{ result: count = 0 }, { result: liked = 0 }] = await Promise.all([
     upstashRequest(['SCARD', keys.voters], { readOnly: true }),
     visitorId
-      ? upstashRequest(['SISMEMBER', keys.voters, visitorId], { readOnly: true })
+      ? upstashRequest(['SISMEMBER', keys.voters, visitorId], {
+          readOnly: true
+        })
       : Promise.resolve({ result: 0 })
   ])
 

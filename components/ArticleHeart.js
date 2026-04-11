@@ -182,8 +182,13 @@ function ArticleHeartButtonInner({ variant = 'bottom', className = '' }) {
       aria-label='为这篇文章点红心'
       onClick={toggle}
       disabled={loading}
-      className={`article-heart-button ${baseClasses} ${variantClasses[variant] || variantClasses.bottom} ${className}`.trim()}>
-      <span className={`mr-2 leading-none ${liked ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
+      className={`article-heart-button ${baseClasses} ${
+        variantClasses[variant] || variantClasses.bottom
+      } ${className}`.trim()}>
+      <span
+        className={`mr-2 leading-none ${
+          liked ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'
+        }`}>
         {liked ? '❤' : '♡'}
       </span>
       <span className='tabular-nums'>{count}</span>
