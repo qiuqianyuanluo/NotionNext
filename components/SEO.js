@@ -20,6 +20,10 @@ const SEO = props => {
   const router = useRouter()
   const meta = getSEOMeta(props, router, useGlobal()?.locale)
   const webFontUrl = siteConfig('FONT_URL')
+  const commentTwikooEnvOrigin = getOrigin(siteConfig('COMMENT_TWIKOO_ENV_ID'))
+  const commentTwikooCDNOrigin = getOrigin(
+    siteConfig('COMMENT_TWIKOO_CDN_URL')
+  )
 
   useEffect(() => {
     // 使用WebFontLoader字体加载
@@ -206,6 +210,18 @@ const SEO = props => {
       <link rel='dns-prefetch' href='//www.google-analytics.com' />
       <link rel='dns-prefetch' href='//www.googletagmanager.com' />
       <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='anonymous' />
+      {commentTwikooEnvOrigin && (
+        <>
+          <link rel='dns-prefetch' href={commentTwikooEnvOrigin} />
+          <link rel='preconnect' href={commentTwikooEnvOrigin} crossOrigin='anonymous' />
+        </>
+      )}
+      {commentTwikooCDNOrigin && (
+        <>
+          <link rel='dns-prefetch' href={commentTwikooCDNOrigin} />
+          <link rel='preconnect' href={commentTwikooCDNOrigin} crossOrigin='anonymous' />
+        </>
+      )}
 
       {/* 预加载关键资源 */}
       <link rel='preload' href='/fonts/inter-var.woff2' as='font' type='font/woff2' crossOrigin='anonymous' />
@@ -278,6 +294,16 @@ const generateStructuredData = (meta, siteInfo, url, image, author) => {
   }
 
   return baseData
+}
+
+const getOrigin = urlLike => {
+  if (!urlLike) return null
+
+  try {
+    return new URL(urlLike).origin
+  } catch (error) {
+    return null
+  }
 }
 
 /**
