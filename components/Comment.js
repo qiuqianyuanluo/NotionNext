@@ -31,6 +31,9 @@ const Comment = ({ frontMatter, className }) => {
   )
     .trim()
     .toLowerCase()
+  const shouldWarmTwikooProactively =
+    Boolean(COMMENT_TWIKOO_ENV_ID) &&
+    (!COMMENT_ACTIVE_SERVICE || COMMENT_ACTIVE_SERVICE === 'twikoo')
 
   useEffect(() => {
     if (shouldLoad || !commentRef.current) {
@@ -60,6 +63,67 @@ const Comment = ({ frontMatter, className }) => {
       }
     }
   }, [frontMatter, shouldLoad])
+
+  useEffect(() => {
+    if (
+      shouldLoad ||
+      !isBrowser ||
+      isSearchEngineBot ||
+      !shouldWarmTwikooProactively
+    ) {
+      return
+    }
+
+    let warmupDelayTimer = null
+    let warmupFallbackTimer = null
+    let idleCallbackId = null
+    let cancelled = false
+
+    const warmComments = () => {
+      if (!cancelled) {
+        setShouldLoad(true)
+      }
+    }
+
+    const scheduleWarmup = () => {
+      warmupDelayTimer = window.setTimeout(() => {
+        if ('requestIdleCallback' in window) {
+          idleCallbackId = window.requestIdleCallback(warmComments, {
+            timeout: 1500
+          })
+        }
+
+        // 兜底：即使浏览器一直忙，也在正文稳定后尽快开始预热评论。
+        warmupFallbackTimer = window.setTimeout(warmComments, 1600)
+      }, 800)
+    }
+
+    if (document.readyState === 'complete') {
+      scheduleWarmup()
+    } else {
+      window.addEventListener('load', scheduleWarmup, { once: true })
+    }
+
+    return () => {
+      cancelled = true
+      window.removeEventListener('load', scheduleWarmup)
+
+      if (warmupDelayTimer) {
+        clearTimeout(warmupDelayTimer)
+      }
+
+      if (warmupFallbackTimer) {
+        clearTimeout(warmupFallbackTimer)
+      }
+
+      if (
+        idleCallbackId !== null &&
+        'cancelIdleCallback' in window
+      ) {
+        window.cancelIdleCallback(idleCallbackId)
+      }
+    }
+  }, [shouldLoad, shouldWarmTwikooProactively])
 
   // 当连接中有特殊参数时跳转到评论区
   useEffect(() => {
