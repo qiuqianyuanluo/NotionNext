@@ -28,6 +28,29 @@ const Twikoo = () => {
     }
   }
 
+  const hasConfiguredForm = host => {
+    const textarea = host.querySelector('textarea')
+    const hostText = host.textContent || ''
+    const textareaPlaceholder = textarea?.getAttribute('placeholder') || ''
+    const hasCommentBody =
+      host.querySelector('.tk-comments .tk-comment') ||
+      host.querySelector('.tk-comments-container') ||
+      host.querySelector('.tk-submit') ||
+      hostText.includes('没有评论')
+
+    const placeholderReady = placeholder
+      ? textareaPlaceholder.includes(placeholder) || hostText.includes(placeholder)
+      : Boolean(textarea)
+
+    // 我们当前只显示昵称和邮箱；如果表单里还出现“网址”，说明配置还没完全生效。
+    const linkFieldSettled =
+      !hostText.includes('网址') &&
+      !hostText.includes('网站') &&
+      !hostText.includes('Website')
+
+    return Boolean(textarea && placeholderReady && linkFieldSettled && hasCommentBody)
+  }
+
   const preconnect = urlLike => {
     if (typeof document === 'undefined' || !urlLike) return
 
@@ -72,13 +95,13 @@ const Twikoo = () => {
       )
     }
 
-    if (hasRenderableContent()) {
+    if (hasConfiguredForm(host)) {
       markReadySoon()
     }
 
     observerRef.current?.disconnect()
     observerRef.current = new MutationObserver(() => {
-      if (hasRenderableContent()) {
+      if (hasConfiguredForm(host)) {
         markReadySoon()
       }
     })
@@ -91,10 +114,10 @@ const Twikoo = () => {
     })
 
     const fallback = setTimeout(() => {
-      if (hasRenderableContent()) {
+      if (hasConfiguredForm(host) || hasRenderableContent()) {
         setIsReady(true)
       }
-    }, 2500)
+    }, 3800)
 
     return () => {
       clearTimeout(fallback)
@@ -134,8 +157,11 @@ const Twikoo = () => {
         })
         clearForceReadyTimer()
         forceReadyTimerRef.current = setTimeout(() => {
-          setIsReady(true)
-        }, 900)
+          const host = document.querySelector(el)
+          if (host && hasConfiguredForm(host)) {
+            setIsReady(true)
+          }
+        }, 1800)
       } catch (error) {
         console.error('twikoo 加载失败', error)
       }
