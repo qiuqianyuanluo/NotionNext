@@ -50,7 +50,7 @@ const Comment = ({ frontMatter, className }) => {
           observer.unobserve(entry.target)
         }
       })
-    }, { rootMargin: '320px 0px' })
+    }, { rootMargin: '960px 0px' })
 
     observer.observe(commentRef.current)
 
@@ -149,9 +149,15 @@ const Comment = ({ frontMatter, className }) => {
   const forcedCommentItem =
     COMMENT_ACTIVE_SERVICE && singleServiceItems[COMMENT_ACTIVE_SERVICE]
 
-  // 当前站点优先只保留 Cusdis；如果未配置 Cusdis，再回退到其它评论系统。
+  // 迁移完成后默认优先走 Twikoo；保留 Cusdis 作为后备，便于回滚。
   const commentItems = forcedCommentItem
     ? [forcedCommentItem]
+    : COMMENT_TWIKOO_ENV_ID
+    ? [
+        <div key='Twikoo'>
+          <TwikooCompenent />
+        </div>
+      ]
     : COMMENT_CUSDIS_APP_ID
     ? [
         <div key='Cusdis'>
