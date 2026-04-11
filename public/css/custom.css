@@ -24,3 +24,8 @@
         min-height: 36rem;
     }
 }
+
+/* Twikoo 当前只保留昵称和邮箱，先用最早加载的 CSS 把默认第三栏网址字段压掉，避免初始化阶段闪一下。 */
+#twikoo .tk-meta-input .el-input:nth-child(3) {
+    display: none !important;
+}
