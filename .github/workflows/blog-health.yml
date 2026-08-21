@@ -1,0 +1,19 @@
+name: Blog health check
+
+on:
+  schedule:
+    - cron: '23 */2 * * *'
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check Notion-backed site data
+        run: curl --fail --show-error --retry 2 https://www.kylinbag.top/api/health
+
+      - name: Check RSS has at least one article
+        run: |
+          curl --fail --show-error --retry 2 https://www.kylinbag.top/rss/feed.xml \
+            | grep --quiet '<item>'
