@@ -10,10 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Check Notion-backed site data
-        run: curl --fail --show-error --retry 2 https://www.kylinbag.top/api/health
+      - name: Check homepage has site data
+        run: |
+          curl --fail --show-error --retry 2 \
+            --output homepage.html https://www.kylinbag.top/
+          grep --quiet '<title>锁麟囊' homepage.html
+          grep --fixed-strings --quiet '"posts":[{' homepage.html
 
       - name: Check RSS has at least one article
         run: |
-          curl --fail --show-error --retry 2 https://www.kylinbag.top/rss/feed.xml \
-            | grep --quiet '<item>'
+          curl --fail --show-error --retry 2 \
+            --output rss.xml https://www.kylinbag.top/rss/feed.xml
+          grep --quiet '<item>' rss.xml
