@@ -1,0 +1,82 @@
+{
+  "slug": "mobile-writing-flow",
+  "title": "从手机写作到博客发布：一篇流程测试",
+  "summary": "这篇文章不是正式博客内容，而是用来验证 Craft 写作、本地快照、自动封面和博客排版之间的衔接。",
+  "status": "preview",
+  "publishDate": "2026-09-20",
+  "category": "工作流测试",
+  "tags": ["Craft", "移动写作", "发布流程"],
+  "cover": {
+    "src": "/bg_image.jpg",
+    "alt": "测试文章封面",
+    "credit": "测试阶段暂用博客现有本地图片；后续替换为导出的 Notion Gallery 图库"
+  },
+  "source": {
+    "provider": "craft",
+    "documentId": "fixture-mobile-writing-flow",
+    "revision": "local-fixture-1"
+  },
+  "mastodon": {
+    "mode": "dry-run",
+    "text": "发布了新文章《从手机写作到博客发布：一篇流程测试》"
+  },
+  "blocks": [
+    {
+      "type": "lead",
+      "text": "目标不是让博客照搬 Craft 的界面，而是让手机端写作保持 Craft 的舒适，同时由博客主题负责最终网页的字体、宽度、留白和响应式排版。"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "这次测试验证什么"
+    },
+    {
+      "type": "paragraph",
+      "text": "文章内容先被保存成与平台无关的本地快照，再由 NotionNext 渲染。这样即使以后 Craft 或 Notion 的接口发生变化，已经发布的文章也不会跟着消失。"
+    },
+    {
+      "type": "list",
+      "style": "unordered",
+      "items": [
+        "手机上在 Craft 中完成标题、正文、图片和发布状态",
+        "自动化把文章转换成仓库内可长期保存的快照",
+        "从本地图库稳定选择一张封面，不依赖临时图片地址",
+        "Vercel Preview 先验收，确认后才进入正式博客",
+        "正式发布成功后再生成一条长毛象嘟文"
+      ]
+    },
+    {
+      "type": "quote",
+      "text": "写作工具负责输入体验，博客负责公开呈现，仓库里的快照负责长期稳定。"
+    },
+    {
+      "type": "image",
+      "src": "/images/testimonial.jpg",
+      "alt": "测试文章中的示例图片",
+      "caption": "用于检查手机端文章中的图片宽度、圆角、说明文字和上下留白。"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "它不会改变什么"
+    },
+    {
+      "type": "paragraph",
+      "text": "当前正式博客仍然从 Notion 读取内容。这个测试入口不会进入首页、归档、RSS 或站点地图，也不会创建 Twikoo 评论页面或红心计数。"
+    },
+    {
+      "type": "code",
+      "language": "text",
+      "text": "Craft 文档 → 规范化快照 → 封面分配 → Vercel Preview → 人工验收 → 正式发布 → 长毛象"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "验收重点"
+    },
+    {
+      "type": "paragraph",
+      "text": "请重点观察手机上的标题比例、正文行距、列表缩进、图片显示和整体阅读节奏。流程是否自动化，要等这一步的视觉方向确认后再接 Craft API。"
+    }
+  ]
+}
