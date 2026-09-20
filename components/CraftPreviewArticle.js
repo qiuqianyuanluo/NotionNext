@@ -1,37 +1,59 @@
+import Comment from '@/components/Comment'
+import {
+  ArticleHeartButton,
+  ArticleHeartProvider
+} from '@/components/ArticleHeart'
+import { AdSlot } from '@/components/GoogleAdsense'
 import LazyImage from '@/components/LazyImage'
+import ShareBar from '@/components/ShareBar'
+import SmartLink from '@/components/SmartLink'
+import WWAds from '@/components/WWAds'
+import { useGlobal } from '@/lib/global'
+import { formatDateFmt } from '@/lib/utils/formatDate'
+import TagItemMini from '@/themes/fukasawa/components/TagItemMini'
 
 function Block({ block }) {
   switch (block.type) {
     case 'heading': {
       const Heading = block.level === 3 ? 'h3' : 'h2'
-      return <Heading>{block.text}</Heading>
+      return (
+        <Heading className={`notion-h notion-h${block.level || 2}`}>
+          {block.text}
+        </Heading>
+      )
     }
     case 'lead':
-      return <p className='craft-lead'>{block.text}</p>
+      return <p className='notion-text craft-lead'>{block.text}</p>
     case 'paragraph':
-      return <p>{block.text}</p>
+      return <p className='notion-text'>{block.text}</p>
     case 'quote':
-      return <blockquote>{block.text}</blockquote>
+      return <blockquote className='notion-quote'>{block.text}</blockquote>
     case 'list': {
       const List = block.style === 'ordered' ? 'ol' : 'ul'
+      const listClass =
+        block.style === 'ordered' ? 'notion-list-numbered' : 'notion-list-disc'
       return (
-        <List>
-          {block.items.map(item => (
-            <li key={item}>{item}</li>
+        <List className={`notion-list ${listClass}`}>
+          {block.items.map((item, index) => (
+            <li key={`${index}-${item}`}>{item}</li>
           ))}
         </List>
       )
     }
     case 'image':
       return (
-        <figure>
+        <figure className='notion-asset-wrapper notion-asset-wrapper-image'>
           <LazyImage src={block.src} alt={block.alt || ''} />
-          {block.caption && <figcaption>{block.caption}</figcaption>}
+          {block.caption && (
+            <figcaption className='notion-asset-caption'>
+              {block.caption}
+            </figcaption>
+          )}
         </figure>
       )
     case 'code':
       return (
-        <pre>
+        <pre className='notion-code'>
           <code>{block.text}</code>
         </pre>
       )
@@ -41,282 +63,156 @@ function Block({ block }) {
 }
 
 export default function CraftPreviewArticle({ post }) {
-  return (
-    <div
-      id='container'
-      className='max-w-5xl overflow-x-auto flex-grow mx-auto w-screen md:w-full'>
-      <div className='craft-cover'>
-        <LazyImage
-          alt={post.cover.alt || post.title}
-          src={post.cover.src}
-          className='object-cover max-h-[60vh] w-full'
-        />
-        <div className='craft-cover-credit'>{post.cover.credit}</div>
-      </div>
+  const { locale, fullWidth } = useGlobal()
 
-      <article className='craft-preview-article subpixel-antialiased overflow-y-hidden px-5 py-10 md:px-32 lg:pt-24 bg-white dark:bg-hexo-black-gray'>
-        <div className='craft-preview-label'>
-          <span>CRAFT PREVIEW</span>
-          <span>不会进入正式博客</span>
+  return (
+    <ArticleHeartProvider post={post}>
+      <div
+        id='container'
+        className={`${fullWidth ? 'px-10' : 'max-w-5xl '} overflow-x-auto flex-grow mx-auto w-screen md:w-full craft-preview-page`}
+      >
+        {post.pageCover && (
+          <div className='w-full relative md:flex-shrink-0 overflow-hidden'>
+            <LazyImage
+              alt={post.cover?.alt || post.title}
+              src={post.pageCover}
+              className='object-cover max-h-[60vh] w-full'
+            />
+          </div>
+        )}
+
+        <article className='subpixel-antialiased overflow-y-hidden py-10 px-5 lg:pt-24 md:px-32 dark:border-gray-700 bg-white dark:bg-hexo-black-gray'>
+          <div className='mb-8 flex flex-wrap items-center justify-between gap-2 border-b border-dashed border-gray-200 pb-3 text-xs text-gray-400 dark:border-gray-700'>
+            <span>Craft 测试预览</span>
+            <span>不会进入首页、RSS 或正式站点地图</span>
+          </div>
+
+          <header>
+            <h1 className='font-bold text-4xl text-black dark:text-white'>
+              {post.title}
+            </h1>
+
+            <section className='flex-wrap flex mt-2 text-gray-400 dark:text-gray-400 font-light leading-8'>
+              <div className='w-full'>
+                {post.category && (
+                  <>
+                    <SmartLink
+                      href={`/category/${post.category}`}
+                      passHref
+                      className='cursor-pointer text-md mr-2 hover:text-black dark:hover:text-white border-b dark:border-gray-500 border-dashed'
+                    >
+                      <i className='mr-1 fas fa-folder-open' />
+                      {post.category}
+                    </SmartLink>
+                    <span className='mr-2'>|</span>
+                  </>
+                )}
+
+                <SmartLink
+                  href={`/archive#${formatDateFmt(post.publishDate, 'yyyy-MM')}`}
+                  passHref
+                  className='pl-1 mr-2 cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 border-b dark:border-gray-500 border-dashed'
+                >
+                  {post.publishDay}
+                </SmartLink>
+                <span className='mr-2'>|</span>
+                <span className='mx-2 text-gray-400 dark:text-gray-500'>
+                  {locale.COMMON.LAST_EDITED_TIME}: {post.lastEditedDay}
+                </span>
+
+                <div className='my-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
+                  <div className='flex justify-start'>
+                    <ArticleHeartButton variant='top' />
+                  </div>
+                  {post.tagItems?.length > 0 && (
+                    <div className='flex flex-nowrap overflow-x-auto md:justify-end'>
+                      {post.tagItems.map(tag => (
+                        <TagItemMini key={tag.name} tag={tag} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+
+            <WWAds className='w-full' orientation='horizontal' />
+          </header>
+
+          <section id='article-wrapper'>
+            <div id='notion-article' className='mx-auto overflow-hidden'>
+              <main className='notion light-mode notion-page craft-preview-body'>
+                {post.blocks.map((block, index) => (
+                  <Block key={`${block.type}-${index}`} block={block} />
+                ))}
+              </main>
+            </div>
+          </section>
+
+          <section>
+            <AdSlot type='in-article' />
+            <ShareBar
+              post={post}
+              leftContent={<ArticleHeartButton variant='bottom' />}
+              stackOnMobile
+            />
+          </section>
+        </article>
+
+        <div className='duration-200 shadow py-6 px-12 w-screen md:w-full overflow-x-auto dark:border-gray-700 bg-white dark:bg-hexo-black-gray'>
+          <Comment frontMatter={post} />
         </div>
 
-        <header>
-          <h1>{post.title}</h1>
-          <div className='craft-meta'>
-            <span>{post.publishDate}</span>
-            <span>{post.category}</span>
-            <span>{post.tags.join(' · ')}</span>
-          </div>
-        </header>
-
-        <section className='craft-body'>
-          {post.blocks.map((block, index) => (
-            <Block key={`${block.type}-${index}`} block={block} />
-          ))}
-        </section>
-
-        <footer className='craft-pipeline'>
-          <div>
-            <strong>内容快照</strong>
-            <span>{post.source.revision}</span>
-          </div>
-          <div>
-            <strong>长毛象</strong>
-            <span>{post.mastodon.mode === 'dry-run' ? '仅预演，不会发送' : post.mastodon.mode}</span>
-          </div>
-        </footer>
-      </article>
-
-      <style jsx global>{`
-        .craft-cover {
-          position: relative;
-          background: #d9d5cc;
-          overflow: hidden;
-        }
-
-        .craft-cover-credit {
-          position: absolute;
-          right: 1rem;
-          bottom: 1rem;
-          max-width: min(28rem, calc(100% - 2rem));
-          padding: 0.45rem 0.7rem;
-          color: rgba(255, 255, 255, 0.92);
-          background: rgba(20, 20, 18, 0.62);
-          backdrop-filter: blur(8px);
-          font-size: 0.7rem;
-          line-height: 1.35;
-        }
-
-        .craft-preview-article {
-          color: #272724;
-        }
-
-        .dark .craft-preview-article {
-          color: #deddd7;
-        }
-
-        .craft-preview-label {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 1rem;
-          margin-bottom: 2.5rem;
-          padding-bottom: 0.8rem;
-          border-bottom: 1px solid #d6d1c7;
-          color: #776f61;
-          font-size: 0.68rem;
-          font-weight: 700;
-          letter-spacing: 0.12em;
-        }
-
-        .craft-preview-article h1 {
-          margin: 0;
-          color: #171714;
-          font-family: Baskerville, 'Songti SC', 'Noto Serif SC', serif;
-          font-size: clamp(2.35rem, 8vw, 4.4rem);
-          font-weight: 600;
-          letter-spacing: -0.035em;
-          line-height: 1.07;
-        }
-
-        .dark .craft-preview-article h1,
-        .dark .craft-body h2,
-        .dark .craft-body h3 {
-          color: #f2f0e8;
-        }
-
-        .craft-meta {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.55rem 1.4rem;
-          margin-top: 1.4rem;
-          color: #8b8376;
-          font-size: 0.78rem;
-          letter-spacing: 0.04em;
-        }
-
-        .craft-body {
-          max-width: 42rem;
-          margin: 4.5rem auto 0;
-          font-family: 'Songti SC', 'Noto Serif SC', Georgia, serif;
-          font-size: 1.08rem;
-          line-height: 2;
-        }
-
-        .craft-body p,
-        .craft-body ul,
-        .craft-body ol,
-        .craft-body blockquote,
-        .craft-body figure,
-        .craft-body pre {
-          margin: 1.7rem 0;
-        }
-
-        .craft-body .craft-lead {
-          margin-bottom: 3rem;
-          color: #4d4a43;
-          font-size: 1.28rem;
-          line-height: 1.8;
-        }
-
-        .dark .craft-body .craft-lead {
-          color: #c8c4ba;
-        }
-
-        .craft-body h2,
-        .craft-body h3 {
-          margin: 4rem 0 1.2rem;
-          color: #25231f;
-          font-family: Baskerville, 'Songti SC', 'Noto Serif SC', serif;
-          font-weight: 600;
-          line-height: 1.35;
-        }
-
-        .craft-body h2 {
-          font-size: 1.75rem;
-        }
-
-        .craft-body h3 {
-          font-size: 1.35rem;
-        }
-
-        .craft-body ul,
-        .craft-body ol {
-          padding-left: 1.4rem;
-        }
-
-        .craft-body li {
-          margin: 0.55rem 0;
-          padding-left: 0.35rem;
-        }
-
-        .craft-body blockquote {
-          padding: 1rem 0 1rem 1.5rem;
-          border-left: 3px solid #a49a88;
-          color: #5f594f;
-          font-size: 1.18rem;
-          font-style: italic;
-        }
-
-        .dark .craft-body blockquote {
-          color: #bbb5a9;
-        }
-
-        .craft-body figure {
-          margin-right: -2.5rem;
-          margin-left: -2.5rem;
-        }
-
-        .craft-body figure img {
-          width: 100%;
-          max-height: 34rem;
-          object-fit: cover;
-        }
-
-        .craft-body figcaption {
-          margin-top: 0.7rem;
-          color: #8a8377;
-          font-family: sans-serif;
-          font-size: 0.75rem;
-          line-height: 1.6;
-          text-align: center;
-        }
-
-        .craft-body pre {
-          overflow-x: auto;
-          padding: 1.2rem 1.4rem;
-          border: 1px solid #dfdbd2;
-          border-radius: 0;
-          background: #f4f1ea;
-          color: #49443b;
-          font-size: 0.78rem;
-          line-height: 1.7;
-          white-space: pre-wrap;
-        }
-
-        .dark .craft-body pre {
-          border-color: #44413c;
-          background: #22211f;
-          color: #d5d0c5;
-        }
-
-        .craft-pipeline {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 1px;
-          margin-top: 5rem;
-          border: 1px solid #ded9cf;
-          background: #ded9cf;
-        }
-
-        .craft-pipeline div {
-          display: flex;
-          flex-direction: column;
-          gap: 0.3rem;
-          padding: 1rem 1.2rem;
-          background: #f7f5ef;
-        }
-
-        .dark .craft-pipeline div {
-          background: #22211f;
-        }
-
-        .craft-pipeline strong {
-          font-size: 0.75rem;
-        }
-
-        .craft-pipeline span {
-          color: #847d70;
-          font-size: 0.7rem;
-        }
-
-        @media (max-width: 640px) {
-          .craft-preview-article {
-            padding-top: 3.5rem;
+        <style jsx global>{`
+          .craft-preview-body {
+            width: 100%;
+            padding: 0;
           }
 
-          .craft-preview-label {
-            align-items: flex-start;
-            flex-direction: column;
-            gap: 0.25rem;
+          .craft-preview-body .notion-text,
+          .craft-preview-body .notion-list,
+          .craft-preview-body .notion-quote,
+          .craft-preview-body .notion-asset-wrapper,
+          .craft-preview-body .notion-code {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
           }
 
-          .craft-body {
-            margin-top: 3.5rem;
-            font-size: 1.02rem;
-            line-height: 1.95;
+          .craft-preview-body .craft-lead {
+            color: #6b7280;
+            font-size: 1.08rem;
           }
 
-          .craft-body figure {
-            margin-right: -1.25rem;
-            margin-left: -1.25rem;
+          .craft-preview-body .notion-h {
+            margin-top: 2.4rem;
+            margin-bottom: 0.8rem;
+            font-weight: 700;
           }
 
-          .craft-pipeline {
-            grid-template-columns: 1fr;
+          .craft-preview-body h2 {
+            font-size: 1.5rem;
           }
-        }
-      `}</style>
-    </div>
+
+          .craft-preview-body h3 {
+            font-size: 1.25rem;
+          }
+
+          .craft-preview-body .notion-asset-wrapper img {
+            width: 100%;
+            height: auto;
+          }
+
+          .craft-preview-body .notion-code {
+            overflow-x: auto;
+            padding: 1rem;
+            background: #f5f5f5;
+            white-space: pre-wrap;
+          }
+
+          .dark .craft-preview-body .notion-code {
+            background: #202020;
+          }
+        `}</style>
+      </div>
+    </ArticleHeartProvider>
   )
 }

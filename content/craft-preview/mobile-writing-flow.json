@@ -13,7 +13,7 @@
   },
   "source": {
     "provider": "craft",
-    "documentId": "fixture-mobile-writing-flow",
+    "documentId": "e6e939db-96ce-43e5-992a-7bbf309d3346",
     "revision": "local-fixture-1"
   },
   "mastodon": {
@@ -62,7 +62,7 @@
     },
     {
       "type": "paragraph",
-      "text": "当前正式博客仍然从 Notion 读取内容。这个测试入口不会进入首页、归档、RSS 或站点地图，也不会创建 Twikoo 评论页面或红心计数。"
+      "text": "当前正式博客仍然从 Notion 读取内容。这个测试入口不会进入首页、归档、RSS 或站点地图，但会使用隔离的测试路径验证 Twikoo 评论、红心和分享功能。"
     },
     {
       "type": "code",
